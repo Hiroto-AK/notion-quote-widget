@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
   <title>今日の名言</title>
 
   <style>
@@ -11,22 +12,30 @@
       box-sizing: border-box;
     }
 
+    html {
+      background: transparent;
+    }
+
     body {
       margin: 0;
       padding: 8px;
-      font-family: system-ui, -apple-system, "Segoe UI",
-        "Noto Sans JP", sans-serif;
+      font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
       background: transparent;
-      color: #333;
+      color: #e6e6e6;
     }
 
     .quote-box {
-      position: relative;
-      background: #f5f5f5;
+      background: #292929;
       border-left: 4px solid #7b9b85;
       border-radius: 8px;
-      padding: 16px 18px;
+      padding: 14px 18px 18px;
       min-height: 125px;
+      width: 100%;
     }
 
     .quote-header {
@@ -36,29 +45,38 @@
     }
 
     .next-button {
-      border: 1px solid #d5d5d5;
-      background: #fff;
-      color: #555;
+      border: 1px solid #555555;
+      background: #383838;
+      color: #eeeeee;
       border-radius: 6px;
-      padding: 6px 12px;
+      padding: 7px 12px;
       font-size: 12px;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .next-button:hover {
-      background: #eaeaea;
+      background: #484848;
+    }
+
+    .next-button:focus-visible {
+      outline: 2px solid #9bbba4;
+      outline-offset: 2px;
     }
 
     .quote-text {
       font-size: 16px;
-      line-height: 1.8;
-      margin: 0 0 10px;
+      line-height: 1.9;
+      margin: 0 0 12px;
       overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      color: #e6e6e6;
     }
 
     .quote-author {
       font-size: 12px;
-      color: #777;
+      line-height: 1.6;
+      color: #aaaaaa;
       text-align: right;
       margin: 0;
     }
@@ -66,74 +84,158 @@
 </head>
 
 <body>
-  <div class="quote-box">
+  <main class="quote-box">
     <div class="quote-header">
-      <button class="next-button" id="nextButton">
+      <button
+        class="next-button"
+        id="nextButton"
+        type="button"
+        aria-label="次の名言を表示"
+      >
         次の名言 →
       </button>
     </div>
 
-    <p class="quote-text" id="quoteText"></p>
+    <p class="quote-text" id="quoteText">
+      今日の名言を読み込み中…
+    </p>
+
     <p class="quote-author" id="quoteAuthor"></p>
-  </div>
+  </main>
 
   <script>
+    // =========================================
+    // 名言リスト
+    // ここに名言を追加・変更できます
+    // =========================================
+
     const quotes = [
       {
-        text: " 世界はボクに興味がないからボクは自由だ。",
+        text: "信念をつらぬけば、勝っても負けても納得があるだろう。。。。",
       },
       {
-        text: "信念をつらぬけば、勝っても負けても納得があるだろう。。。"
+        text: " 世界はボクに興味がないからボクは自由だ",
+      },
+      {
+        text: " 間違ってないだけじゃ勝負には勝てないよ。",
+      },
+      {
+        text: "案ずるより産むが易し。",
+        author: "ことわざ"
+      },
+      {
+        text: "明日は明日の風が吹く。",
+        author: "ことわざ"
       },
       {
         text: "間違ってないだけじゃ勝負には勝てないよ。",
+        author: "オリジナル"
       },
       {
         text: "焦らなくていいよ。一歩ずつ進めば大丈夫。",
-        author: "アリスのオリジナルメッセージ"
+        author: "アリス"
+      },
+      {
+        text: "小さな努力の積み重ねが、大きな変化につながる。",
+        author: "オリジナル"
+      },
+      {
+        text: "できるかどうかではなく、まずやってみよう。",
+        author: "オリジナル"
+      },
+      {
+        text: "昨日の自分より、少しだけ前へ。",
+        author: "オリジナル"
       }
     ];
 
-    // 日付から、その日に表示する名言の番号を決める
-    function getDailyIndex() {
+    // =========================================
+    // 日付をもとに今日の名言を決める
+    // 同じ日なら再読み込みしても同じ名言
+    // =========================================
+
+    function getTodayIndex() {
       const now = new Date();
 
-      const today = Date.UTC(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
+      const todayNumber = Math.floor(
+        Date.UTC(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        ) / 86400000
       );
 
-      const start = Date.UTC(2026, 0, 1);
-      const dayNumber = Math.floor(
-        (today - start) / 86400000
+      // 基準日：2026年1月1日
+      const startNumber = Math.floor(
+        Date.UTC(2026, 0, 1) / 86400000
       );
 
-      return ((dayNumber % quotes.length) + quotes.length)
-        % quotes.length;
+      const dayNumber = todayNumber - startNumber;
+
+      return (
+        (dayNumber % quotes.length) + quotes.length
+      ) % quotes.length;
     }
 
-    let currentIndex = getDailyIndex();
+    // =========================================
+    // 名言の表示
+    // =========================================
+
+    let currentIndex = getTodayIndex();
 
     function showQuote(index) {
-      const quote = quotes[index];
+      if (!Array.isArray(quotes) || quotes.length === 0) {
+        document.getElementById("quoteText").textContent =
+          "名言が登録されていません。";
+
+        document.getElementById("quoteAuthor").textContent = "";
+        return;
+      }
+
+      // 配列の範囲内に番号を収める
+      currentIndex = (
+        (index % quotes.length) + quotes.length
+      ) % quotes.length;
+
+      const quote = quotes[currentIndex];
 
       document.getElementById("quoteText").textContent =
-        quote.text;
+        quote.text || "名言がありません。";
 
       document.getElementById("quoteAuthor").textContent =
-        "— " + quote.author;
+        quote.author ? "— " + quote.author : "— 作者不詳";
     }
 
-    // 初回表示
+    // =========================================
+    // 次の名言ボタン
+    // =========================================
+
+    document.getElementById("nextButton")
+      .addEventListener("click", function () {
+        showQuote(currentIndex + 1);
+      });
+
+    // =========================================
+    // 初期表示
+    // =========================================
+
     showQuote(currentIndex);
 
-    // ボタンを押したときだけ次の名言へ
-    document.getElementById("nextButton")
-      .addEventListener("click", () => {
-        currentIndex = (currentIndex + 1) % quotes.length;
-        showQuote(currentIndex);
-      });
+    // =========================================
+    // 日付が変わったら自動で今日の名言へ更新
+    // ページを開いたままでも日付変更を検知
+    // =========================================
+
+    let lastDate = new Date().toDateString();
+
+    setInterval(function () {
+      const currentDate = new Date().toDateString();
+
+      if (currentDate !== lastDate) {
+        lastDate = currentDate;
+        showQuote(getTodayIndex());
+      }
+    }, 60000);
   </script>
 </body>
 </html>
