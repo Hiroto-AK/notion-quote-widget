@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今日の名言</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    padding: 14px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: transparent;
+  }
+  .widget {
+    width: min(100%, 620px); padding: clamp(22px, 5vw, 38px);
+    border: 1px solid color-mix(in srgb, CanvasText 14%, transparent);
+    border-radius: 22px; background: Canvas; color: CanvasText;
+    box-shadow: 0 8px 28px rgba(0,0,0,.08);
+  }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; opacity: .65; text-transform: uppercase; }
+  #quote { font-size: clamp(22px, 4vw, 32px); font-weight: 700; line-height: 1.6; margin: 18px 0; overflow-wrap: anywhere; }
+  #author { font-size: 14px; opacity: .72; min-height: 1.5em; }
+  .footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
+  #date { font-size:12px; opacity:.6; }
+  button { border:0; border-radius:999px; padding:11px 17px; font:inherit; font-size:14px; cursor:pointer; background:CanvasText; color:Canvas; }
+  button:focus-visible { outline: 3px solid #7aa7ff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main class="widget" aria-live="polite">
+  <div class="eyebrow">QUOTE OF THE DAY</div>
+  <div id="quote">今日の名言を読み込み中…</div>
+  <div id="author"></div>
+  <div class="footer">
+    <span id="date"></span>
+    <button id="next" type="button">別の名言を引く ↻</button>
+  </div>
+</main>
+<script>
+  // ここに名言を追加・編集できます。text と author を書き換えてください。
+  const quotes = [
+    { text: "まずは5分だけ行動する。小さく始めることが、前進になる。", author: "行動指針" },
+    { text: "完璧を待つより、始めてから改善する。", author: "行動指針" },
+    { text: "今日できる小さな一歩を、未来の自分に贈ろう。", author: "目標" },
+    { text: "他人と比べるより、昨日の自分を少し超える。", author: "成長" },
+    { text: "続けられる形に変えることも、努力のひとつ。", author: "習慣" },
+    { text: "迷ったら、あとで自分を誇れる選択をする。", author: "行動指針" },
+    { text: "休むことは、前に進み続けるための準備。", author: "セルフケア" },
+    { text: "大きな結果は、小さな積み重ねから生まれる。", author: "成長" }
+  ];
+
+  const quoteEl = document.getElementById("quote");
+  const authorEl = document.getElementById("author");
+  const dateEl = document.getElementById("date");
+  const nextBtn = document.getElementById("next");
+  let currentIndex = 0;
+
+  function dayNumber(date) {
+    const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return Math.floor(localMidnight.getTime() / 86400000);
+  }
+  function show(index) {
+    currentIndex = index;
+    quoteEl.textContent = "「" + quotes[index].text + "」";
+    authorEl.textContent = quotes[index].author ? "— " + quotes[index].author : "";
+  }
+  function randomOtherIndex() {
+    if (quotes.length < 2) return 0;
+    let index;
+    do { index = Math.floor(Math.random() * quotes.length); }
+    while (index === currentIndex);
+    return index;
+  }
+  if (quotes.length) {
+    const now = new Date();
+    // 日付を種にして、その日の候補を決定します（同じ日は同じ名言）。
+    const seed = dayNumber(now);
+    const pseudoRandom = Math.abs(Math.sin(seed * 12.9898) * 43758.5453) % 1;
+    currentIndex = Math.floor(pseudoRandom * quotes.length);
+    show(currentIndex);
+    dateEl.textContent = now.toLocaleDateString("ja-JP", { year:"numeric", month:"long", day:"numeric" });
+    nextBtn.addEventListener("click", () => show(randomOtherIndex()));
+  } else {
+    quoteEl.textContent = "quotes 配列に名言を追加してください。";
+    nextBtn.disabled = true;
+  }
+</script>
+</body>
+</html>
