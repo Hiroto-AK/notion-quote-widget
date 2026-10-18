@@ -1,86 +1,150 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>今日の名言</title>
-<style>
-  :root { color-scheme: light dark; }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; display: grid; place-items: center;
-    padding: 14px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: transparent;
-  }
-  .widget {
-    width: min(100%, 620px); padding: clamp(22px, 5vw, 38px);
-    border: 1px solid color-mix(in srgb, CanvasText 14%, transparent);
-    border-radius: 22px; background: Canvas; color: CanvasText;
-    box-shadow: 0 8px 28px rgba(0,0,0,.08);
-  }
-  .eyebrow { font-size: 12px; letter-spacing: .12em; opacity: .65; text-transform: uppercase; }
-  #quote { font-size: clamp(22px, 4vw, 32px); font-weight: 700; line-height: 1.6; margin: 18px 0; overflow-wrap: anywhere; }
-  #author { font-size: 14px; opacity: .72; min-height: 1.5em; }
-  .footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
-  #date { font-size:12px; opacity:.6; }
-  button { border:0; border-radius:999px; padding:11px 17px; font:inherit; font-size:14px; cursor:pointer; background:CanvasText; color:Canvas; }
-  button:focus-visible { outline: 3px solid #7aa7ff; outline-offset: 3px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今日の名言</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 8px;
+      font-family: system-ui, -apple-system, "Segoe UI",
+        "Noto Sans JP", sans-serif;
+      background: transparent;
+      color: #333;
+    }
+
+    .quote-box {
+      position: relative;
+      background: #f5f5f5;
+      border-left: 4px solid #7b9b85;
+      border-radius: 8px;
+      padding: 16px 18px;
+      min-height: 125px;
+    }
+
+    .quote-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .next-button {
+      border: 1px solid #d5d5d5;
+      background: #fff;
+      color: #555;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .next-button:hover {
+      background: #eaeaea;
+    }
+
+    .quote-text {
+      font-size: 16px;
+      line-height: 1.8;
+      margin: 0 0 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      color: #777;
+      text-align: right;
+      margin: 0;
+    }
+  </style>
 </head>
+
 <body>
-<main class="widget" aria-live="polite">
-  <div class="eyebrow">QUOTE OF THE DAY</div>
-  <div id="quote">今日の名言を読み込み中…</div>
-  <div id="author"></div>
-  <div class="footer">
-    <span id="date"></span>
-    <button id="next" type="button">別の名言を引く ↻</button>
+  <div class="quote-box">
+    <div class="quote-header">
+      <button class="next-button" id="nextButton">
+        次の名言 →
+      </button>
+    </div>
+
+    <p class="quote-text" id="quoteText"></p>
+    <p class="quote-author" id="quoteAuthor"></p>
   </div>
-</main>
-<script>
-  // ここに名言を追加・編集できます。text と author を書き換えてください。
-  const quotes = [
-    { text: "間違ってないだけじゃ勝負には勝てないよ"},
-    { text: "世界はボクに興味がないからボクは自由だ", author:},
-    { text: "休むことは、前に進み続けるための準備。", author: "セルフケア" },
-    { text: "信念をつらぬけば、勝っても負けても納得があるだろう。。。"}
-  ];
 
-  const quoteEl = document.getElementById("quote");
-  const authorEl = document.getElementById("author");
-  const dateEl = document.getElementById("date");
-  const nextBtn = document.getElementById("next");
-  let currentIndex = 0;
+  <script>
+    const quotes = [
+      {
+        text: "千里の道も一歩から。",
+        author: "ことわざ"
+      },
+      {
+        text: "失敗は成功のもと。",
+        author: "ことわざ"
+      },
+      {
+        text: "継続は力なり。",
+        author: "ことわざ"
+      },
+      {
+        text: "案ずるより産むが易し。",
+        author: "ことわざ"
+      },
+      {
+        text: "明日は明日の風が吹く。",
+        author: "ことわざ"
+      },
+      {
+        text: "焦らなくていいよ。一歩ずつ進めば大丈夫。",
+        author: "アリスのオリジナルメッセージ"
+      }
+    ];
 
-  function dayNumber(date) {
-    const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    return Math.floor(localMidnight.getTime() / 86400000);
-  }
-  function show(index) {
-    currentIndex = index;
-    quoteEl.textContent = "「" + quotes[index].text + "」";
-    authorEl.textContent = quotes[index].author ? "— " + quotes[index].author : "";
-  }
-  function randomOtherIndex() {
-    if (quotes.length < 2) return 0;
-    let index;
-    do { index = Math.floor(Math.random() * quotes.length); }
-    while (index === currentIndex);
-    return index;
-  }
-  if (quotes.length) {
-    const now = new Date();
-    // 日付を種にして、その日の候補を決定します（同じ日は同じ名言）。
-    const seed = dayNumber(now);
-    const pseudoRandom = Math.abs(Math.sin(seed * 12.9898) * 43758.5453) % 1;
-    currentIndex = Math.floor(pseudoRandom * quotes.length);
-    show(currentIndex);
-    dateEl.textContent = now.toLocaleDateString("ja-JP", { year:"numeric", month:"long", day:"numeric" });
-    nextBtn.addEventListener("click", () => show(randomOtherIndex()));
-  } else {
-    quoteEl.textContent = "quotes 配列に名言を追加してください。";
-    nextBtn.disabled = true;
-  }
-</script>
+    // 日付から、その日に表示する名言の番号を決める
+    function getDailyIndex() {
+      const now = new Date();
+
+      const today = Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+
+      const start = Date.UTC(2026, 0, 1);
+      const dayNumber = Math.floor(
+        (today - start) / 86400000
+      );
+
+      return ((dayNumber % quotes.length) + quotes.length)
+        % quotes.length;
+    }
+
+    let currentIndex = getDailyIndex();
+
+    function showQuote(index) {
+      const quote = quotes[index];
+
+      document.getElementById("quoteText").textContent =
+        quote.text;
+
+      document.getElementById("quoteAuthor").textContent =
+        "— " + quote.author;
+    }
+
+    // 初回表示
+    showQuote(currentIndex);
+
+    // ボタンを押したときだけ次の名言へ
+    document.getElementById("nextButton")
+      .addEventListener("click", () => {
+        currentIndex = (currentIndex + 1) % quotes.length;
+        showQuote(currentIndex);
+      });
+  </script>
 </body>
 </html>
